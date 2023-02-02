@@ -15,26 +15,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const addResult = await FirebaseAdmin.getInstance()
-      .Firebase.collection('members')
-      .doc(uid)
-      .set({
-        uid,
-        email: email ?? '',
-        displayName: displayName ?? '',
-        photoURL: photoURL ?? '',
-      });
     const screenName = (email as string).replace('@gmail.com', '');
-    await FirebaseAdmin.getInstance()
-      .Firebase.collection('screen_names')
-      .doc(screenName)
-      .set({
+    const addResult = await FirebaseAdmin.getInstance().Firebase.runTransaction(async (transaction) => {
+      const memberRef = FirebaseAdmin.getInstance().Firebase.collection('members').doc(uid);
+      const screenNameRef = FirebaseAdmin.getInstance().Firebase.collection('screen_names').doc(screenName);
+      const memberDoc = await transaction.get(memberRef);
+      if (memberDoc.exists) {
+        return false;
+      }
+      const addData = {
         uid,
         email: email ?? '',
         displayName: displayName ?? '',
         photoURL: photoURL ?? '',
-      });
-    return res.status(200).json({ result: true, id: addResult });
+      };
+      await transaction.set(memberRef, addData);
+      await transaction.set(screenNameRef, addData);
+      return true;
+    });
+    if (addResult === false) {
+      return res.status(201).json({ result: true, id: uid });
+    }
+    return res.status(200).json({ result: true, id: uid });
   } catch (err) {
     console.error(err);
     res.status(500).json({ result: false });
