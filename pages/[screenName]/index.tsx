@@ -183,6 +183,17 @@ const UserHomePage: NextPage<Props> = function ({ userInfo }) {
               replayAt: '2022-05-15T20:15:55+09:00',
             }}
           />
+          <MessageItem
+            uid="asdf"
+            displayName="test"
+            isOwner
+            photoURL={authUser?.photoURL ?? '/user.png'}
+            item={{
+              id: 'test',
+              message: 'test',
+              createAt: '2022-04-15T20:15:55+09:00',
+            }}
+          />
         </VStack>
       </Box>
     </ServiceLayout>
