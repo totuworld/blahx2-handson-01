@@ -90,10 +90,34 @@ async function postReply({ uid, messageId, reply }: { uid: string; messageId: st
   });
 }
 
+async function get({ uid, messageId }: { uid: string; messageId: string }) {
+  const memberRef = Firestore.collection(MEMBER_COL).doc(uid);
+  const messageRef = memberRef.collection(MSG_COL).doc(messageId);
+  const data = await Firestore.runTransaction(async (transaction) => {
+    const memberDoc = await transaction.get(memberRef);
+    if (memberDoc.exists === false) {
+      throw new CustomServerError({ statusCode: 400, message: '존재하지않는 사용자입니다' });
+    }
+    const messageDoc = await transaction.get(messageRef);
+    if (messageDoc.exists === false) {
+      throw new CustomServerError({ statusCode: 400, message: '존재하지않는 문서' });
+    }
+    const messageData = messageDoc.data() as InMessageServer;
+    return {
+      ...messageData,
+      id: messageDoc.id,
+      createAt: messageData.createAt.toDate().toISOString(),
+      replyAt: messageData.replyAt ? messageData.replyAt.toDate().toISOString() : undefined,
+    };
+  });
+  return data;
+}
+
 const MessageModel = {
   post,
   list,
   postReply,
+  get,
 };
 
 export default MessageModel;

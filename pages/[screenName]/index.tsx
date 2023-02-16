@@ -87,6 +87,26 @@ const UserHomePage: NextPage<Props> = function ({ userInfo }) {
     }
   }
 
+  async function fetchMessageInfo({ uid, messageId }: { uid: string; messageId: string }) {
+    try {
+      const resp = await fetch(`/api/messages.info?uid=${uid}&messageId=${messageId}`);
+      if (resp.status === 200) {
+        const data: InMessage = await resp.json();
+        setMessageList((prev) => {
+          const findIndex = prev.findIndex((fv) => fv.id === data.id);
+          if (findIndex >= 0) {
+            const updateArr = [...prev];
+            updateArr[findIndex] = data;
+            return updateArr;
+          }
+          return prev;
+        });
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
   useEffect(() => {
     if (userInfo === null) return;
     fetchMessageList(userInfo.uid);
@@ -201,7 +221,7 @@ const UserHomePage: NextPage<Props> = function ({ userInfo }) {
               photoURL={userInfo.photoURL ?? '/user.png'}
               isOwner={isOwner}
               onSendComplete={() => {
-                setMessageListFetchTrigger((prev) => !prev);
+                fetchMessageInfo({ uid: userInfo.uid, messageId: messageData.id });
               }}
             />
           ))}
