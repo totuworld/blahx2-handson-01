@@ -43,7 +43,7 @@ const MessageItem = function ({ displayName, photoURL, isOwner, item }: Props) {
                 <Flex alignItems="center">
                   <Text fontSize="xs">{displayName}</Text>
                   <Text whiteSpace="pre-line" fontSize="xs" color="gray">
-                    {convertDateToString(item.replayAt!)}
+                    {convertDateToString(item.replyAt!)}
                   </Text>
                 </Flex>
                 <Text whiteSpace="pre-line" fontSize="xs">

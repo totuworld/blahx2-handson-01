@@ -61,7 +61,7 @@ async function list({ uid }: { uid: string }) {
         ...docData,
         id: mv.id,
         createAt: docData.createAt.toDate().toISOString(),
-        replayAt: docData.replayAt ? docData.replayAt.toDate().toISOString() : undefined,
+        replyAt: docData.replyAt ? docData.replyAt.toDate().toISOString() : undefined,
       } as InMessage;
       return returnData;
     });
@@ -70,9 +70,30 @@ async function list({ uid }: { uid: string }) {
   return listData;
 }
 
+async function postReply({ uid, messageId, reply }: { uid: string; messageId: string; reply: string }) {
+  const memberRef = Firestore.collection(MEMBER_COL).doc(uid);
+  const messageRef = memberRef.collection(MSG_COL).doc(messageId);
+  await Firestore.runTransaction(async (transaction) => {
+    const memberDoc = await transaction.get(memberRef);
+    if (memberDoc.exists === false) {
+      throw new CustomServerError({ statusCode: 400, message: '존재하지않는 사용자입니다' });
+    }
+    const messageDoc = await transaction.get(messageRef);
+    if (messageDoc.exists === false) {
+      throw new CustomServerError({ statusCode: 400, message: '존재하지않는 문서' });
+    }
+    const messageData = messageDoc.data() as InMessageServer;
+    if (messageData.reply !== undefined) {
+      throw new CustomServerError({ statusCode: 400, message: '이미 댓글을 입력했습니다' });
+    }
+    await transaction.update(messageRef, { reply, replyAt: firestore.FieldValue.serverTimestamp() });
+  });
+}
+
 const MessageModel = {
   post,
   list,
+  postReply,
 };
 
 export default MessageModel;

@@ -13,10 +13,10 @@ export interface MessageBase {
 }
 export interface InMessage extends MessageBase {
   createAt: string;
-  replayAt?: string;
+  replyAt?: string;
 }
 
-export interface InMessageServer {
+export interface InMessageServer extends MessageBase {
   createAt: firestore.Timestamp;
-  replayAt?: firestore.Timestamp;
+  replyAt?: firestore.Timestamp;
 }
