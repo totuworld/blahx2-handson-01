@@ -67,7 +67,6 @@ async function postMessage({
 }
 
 const UserHomePage: NextPage<Props> = function ({ userInfo, screenName }) {
-  console.log(userInfo, screenName);
   const [message, setMessage] = useState('');
   const [messageList, setMessageList] = useState<InMessage[]>([]);
   const [isAnonymous, setAnonymous] = useState(true);
