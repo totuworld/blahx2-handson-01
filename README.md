@@ -19,3 +19,5 @@ PORT=3000
 HOST=localhost
 PROTOCOL=http
 ```
+
+빌드 트리거
